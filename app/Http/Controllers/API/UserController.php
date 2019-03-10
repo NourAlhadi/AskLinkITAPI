@@ -11,6 +11,7 @@ use Validator;
 class UserController extends Controller{
 
     public $successStatus = 200;
+    public $unAuthorised = 401;
 
     /**
      * Login API Endpoint
@@ -20,16 +21,22 @@ class UserController extends Controller{
      */
     public function login(Request $request){
 
-        $email = $request->get('email');
+        $username = $request->get('username');
         $password = $request->get('password');
 
-        if(Auth::attempt(['email' => $email, 'password' => $password])){
+        if(Auth::attempt(['username' => $username, 'password' => $password])){
             $user = Auth::user();
-            $success['token'] =  $user->createToken('askLinkIT')-> accessToken;
-            return response()->json(['success' => $success], $this-> successStatus);
+            $token =  $user->createToken('askLinkIT')-> accessToken;
+            return response()->json([
+                'result' => 'success',
+                'token' => $token,
+            ], $this-> successStatus);
         }
         else{
-            return response()->json(['error'=>'Unauthorised'], 401);
+            return response()->json([
+                'result' => 'error',
+                'message'=>'Unauthorised'
+            ], $this->unAuthorised);
         }
     }
 
@@ -44,19 +51,25 @@ class UserController extends Controller{
 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users',
+            'username' => 'required|unique:users',
             'password' => 'required',
             'c_password' => 'required|same:password',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error'=>$validator->errors()], 401);
+            return response()->json([
+                'result' => 'error',
+                'message'=>$validator->errors()
+            ], $this->unAuthorised);
         }
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
-        $success['token'] =  $user->createToken('askLinkIT')-> accessToken;
-        $success['name'] =  $user->name;
-        return response()->json(['success'=>$success], $this-> successStatus);
+        $token =  $user->createToken('askLinkIT')-> accessToken;
+        return response()->json([
+            'result' => 'success',
+            'token' => $token
+        ], $this-> successStatus);
     }
 
     /**
@@ -67,6 +80,9 @@ class UserController extends Controller{
     public function details(){
 
         $user = Auth::user();
-        return response()->json(['success' => $user], $this-> successStatus);
+        return response()->json([
+            'result' => 'success',
+            'user' => $user
+        ], $this-> successStatus);
     }
 }

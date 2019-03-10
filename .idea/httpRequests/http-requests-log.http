@@ -1,0 +1,16 @@
+POST http://localhost:8000/api/login?username=admin&password=LinkIT
+Accept: */*
+Cache-Control: no-cache
+
+<> 2019-03-10T112353.200.json
+
+###
+
+POST http://localhost:8000/api/login?username=admin&password=LinkIT
+Accept: */*
+Cache-Control: no-cache
+
+<> 2019-03-10T112339.200.json
+
+###
+
