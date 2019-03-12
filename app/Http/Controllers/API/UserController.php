@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Validator;
 
 class UserController extends Controller{
@@ -62,9 +63,11 @@ class UserController extends Controller{
                 'message'=>$validator->errors()
             ], $this->unAuthorised);
         }
+
         $input = $request->all();
-        $input['password'] = bcrypt($input['password']);
+        $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
+
         $token =  $user->createToken('askLinkIT')-> accessToken;
         return response()->json([
             'result' => 'success',
@@ -73,16 +76,112 @@ class UserController extends Controller{
     }
 
     /**
-     * details api
+     * User Info API Endpoint
      *
      * @return \Illuminate\Http\Response
      */
-    public function details(){
+    public function user(){
 
         $user = Auth::user();
+        $avatar = url('') . '/images/' . $user->avatar;
         return response()->json([
             'result' => 'success',
-            'user' => $user
+            'user' => $user,
+            'avatar' => $avatar
         ], $this-> successStatus);
     }
+
+    /**
+     * Edit User Info API Endpoint
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userEdit(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'email|unique:users',
+            'avatar' => 'file|max:4096',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'result' => 'error',
+                'message'=>$validator->errors()
+            ], $this->unAuthorised);
+        }
+
+        if ( !Hash::check($request->get('password'),Auth::user()->password) ){
+            return response()->json([
+                'result' => 'error',
+                'password' => Hash::make(($request->get('password'))),
+                'authpass' => Auth::user()->password
+            ], $this->unAuthorised);
+        }
+
+
+        $user = Auth::user();
+        if (!is_null($request->get('name'))) $user->name = $request->get('name');
+        if (!is_null($request->get('email'))) $user->email = $request->get('email');
+        if ($request->hasFile('avatar')) {
+
+            $image = $request->file('avatar');
+            $name = md5(uniqid($image->getBasename())).'.'.$image->guessExtension();
+            $destinationPath = public_path('/images');
+            $image->move($destinationPath, $name);
+            $user->avatar = $name;
+        }
+        $user->save();
+
+        $avatar = url('') . '/images/' . $user->avatar;
+        return response()->json([
+            'result' => 'success',
+            'user' => $user,
+            'avatar' => $avatar
+        ],$this->successStatus);
+
+    }
+
+    /**
+     * Get User Avatar API Endpoint
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function getAvatar(){
+        $user = Auth::user();
+        return response()->file(public_path('/images/' . $user->avatar));
+    }
+
+
+    /**
+     * Set User Avatar API Endpoint
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function setAvatar(Request $request){
+        $user = Auth::user();
+        if ($request->hasFile('avatar')) {
+
+            $image = $request->file('avatar');
+            $name = md5(uniqid($image->getBasename())).'.'.$image->guessExtension();
+            $destinationPath = public_path('/images');
+            $image->move($destinationPath, $name);
+            $user->avatar = $name;
+
+            $avatar = url('') . '/images/' . $user->avatar;
+            return response()->json([
+                'result' => 'success',
+                'avatar' => $avatar
+            ],$this->successStatus);
+        }else{
+            // Error Code 422 for Unprocessable Entity
+            return response()->json([
+                'result' => 'error',
+                'message' => 'Missing the new avatar'
+            ],422);
+        }
+    }
+
+
 }

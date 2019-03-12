@@ -22,5 +22,8 @@ Route::post('login', 'API\UserController@login');
 Route::post('register', 'API\UserController@register');
 
 Route::group(['middleware' => 'auth:api'], function() {
-    Route::post('details', 'API\UserController@details');
+    Route::post('user', 'API\UserController@user');
+    Route::patch('user/edit', 'API\UserController@userEdit');
+    Route::get('user/avatar', 'API\UserController@getAvatar');
+    Route::patch('user/edit/avatar', 'API\UserController@setAvatar');
 });

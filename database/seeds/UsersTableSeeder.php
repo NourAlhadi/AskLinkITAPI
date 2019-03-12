@@ -14,7 +14,7 @@ class UsersTableSeeder extends Seeder{
             'name' => 'admin',
             'username' => 'admin',
             'email' => 'admin@linkit.com',
-            'password' => bcrypt('LinkIT'),
+            'password' => Hash::make('LinkIT'),
         ]);
     }
 }

@@ -1,0 +1,22 @@
+{
+  "result": "success",
+  "user": {
+    "id": 1,
+    "name": "admin",
+    "email": "admin@linkit.com",
+    "username": "admin",
+    "avatar": "default.png",
+    "email_verified_at": null,
+    "created_at": null,
+    "updated_at": null
+  },
+  "request": {
+    "attributes": {},
+    "request": {},
+    "query": {},
+    "server": {},
+    "files": {},
+    "cookies": {},
+    "headers": {}
+  }
+}
