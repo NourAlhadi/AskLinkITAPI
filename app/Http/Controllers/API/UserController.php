@@ -101,7 +101,7 @@ class UserController extends Controller{
         $validator = Validator::make($request->all(), [
             'email' => 'email|unique:users',
             'avatar' => 'file|max:4096',
-            'password' => 'required',
+            'name' => 'min:2',
         ]);
 
         if ($validator->fails()) {
@@ -110,15 +110,6 @@ class UserController extends Controller{
                 'message'=>$validator->errors()
             ], $this->unAuthorised);
         }
-
-        if ( !Hash::check($request->get('password'),Auth::user()->password) ){
-            return response()->json([
-                'result' => 'error',
-                'password' => Hash::make(($request->get('password'))),
-                'authpass' => Auth::user()->password
-            ], $this->unAuthorised);
-        }
-
 
         $user = Auth::user();
         if (!is_null($request->get('name'))) $user->name = $request->get('name');
