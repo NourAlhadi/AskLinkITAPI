@@ -44,11 +44,18 @@ class Handler extends ExceptionHandler
      * @param  \Exception  $exception
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $exception)
-    {
+    public function render($request, Exception $exception){
+
+
+        if ( strlen($exception->getMessage()) == 0){
+            return response()->json([
+                'result' => 'error',
+                'exception' => 'Permission denied',
+            ], 403);
+        }
         return response()->json([
             'result' => 'error',
-            'expepction' => $exception->getMessage()
+            'exception' => $exception->getMessage()
         ],500);
         //return parent::render($request, $exception);
     }

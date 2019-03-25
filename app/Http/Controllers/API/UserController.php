@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -58,15 +59,23 @@ class UserController extends Controller{
             'c_password' => 'required|same:password',
         ]);
         if ($validator->fails()) {
+            $message = "";
+            foreach ($validator->errors()->keys() as $key){
+                foreach($validator->errors()->get($key) as $msg) {
+                    $message .= $msg . htmlspecialchars('\n');
+                }
+            }
+            $message = str_replace("\\n","\n",$message);
             return response()->json([
                 'result' => 'error',
-                'message'=>$validator->errors()
+                'message'=>$message
             ], $this->unAuthorised);
         }
 
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
+        $user->attachRole(Role::find(3));
 
         $token =  $user->createToken('askLinkIT')-> accessToken;
         return response()->json([

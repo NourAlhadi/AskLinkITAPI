@@ -13,17 +13,19 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-
+// Login / Registration
 Route::post('login', 'API\UserController@login');
 Route::post('register', 'API\UserController@register');
 
+// Users
 Route::group(['middleware' => 'auth:api'], function() {
     Route::get('user', 'API\UserController@user');
     Route::patch('user/edit', 'API\UserController@userEdit');
     Route::get('user/avatar', 'API\UserController@getAvatar');
     Route::patch('user/edit/avatar', 'API\UserController@setAvatar');
+});
+
+// Admin
+Route::group(['prefix' => 'admin', 'middleware' => ['auth:api']], function() {
+    Route::get('/check','API\Admin\AdminController@check');
 });
