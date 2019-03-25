@@ -21,6 +21,34 @@ class AdminController extends Controller{
         $this->role_super = Role::find(1);
     }
 
+    public function makeUser(Request $request){
+
+        $user = $request->get('user_id');
+        $user = User::find($user);
+        if (is_null($user)) {
+            return response()->json([
+                'result' => 'error',
+                'message' => 'User not found'
+            ]);
+        }
+        if ($user->hasRole($this->role_super->name)) {
+            $user->detachRole($this->role_super);
+        }
+
+        if ($user->hasRole($this->role_admin->name)) {
+            $user->detachRole($this->role_admin);
+        }
+
+        if (! $user->hasRole($this->role_user->name)){
+            $user->attachRole($this->role_user);
+        }
+
+        return response()->json([
+            'result' => 'success',
+            'message' => 'User is now a normal user'
+        ]);
+    }
+
     public function makeAdmin(Request $request){
 
         $user = $request->get('user_id');
@@ -78,33 +106,7 @@ class AdminController extends Controller{
         ]);
     }
 
-    public function makeUser(Request $request){
 
-        $user = $request->get('user_id');
-        $user = User::find($user);
-        if (is_null($user)) {
-            return response()->json([
-                'result' => 'error',
-                'message' => 'User not found'
-            ]);
-        }
-        if ($user->hasRole($this->role_super->name)) {
-            $user->detachRole($this->role_super);
-        }
-
-        if ($user->hasRole($this->role_admin->name)) {
-            $user->detachRole($this->role_admin);
-        }
-
-        if (! $user->hasRole($this->role_user->name)){
-            $user->attachRole($this->role_user);
-        }
-
-        return response()->json([
-            'result' => 'success',
-            'message' => 'User is now a normal user'
-        ]);
-    }
 
     public function check(){
         return response()->json([
