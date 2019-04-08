@@ -27,8 +27,16 @@ Route::group(['middleware' => 'auth:api'], function() {
 
 // Admin
 Route::group(['prefix' => 'admin', 'middleware' => ['auth:api']], function() {
+    // User Manipulation
     Route::get('/check','API\Admin\AdminController@check');
     Route::post('/make/user','API\Admin\AdminController@makeUser');
     Route::post('/make/admin','API\Admin\AdminController@makeAdmin');
     Route::post('/make/super','API\Admin\AdminController@makeSuper');
+});
+
+
+// Posts
+// Categories
+Route::group(['middleware'=>['auth:api']], function(){
+    Route::apiResource('categories', 'API\CategoryController');
 });
