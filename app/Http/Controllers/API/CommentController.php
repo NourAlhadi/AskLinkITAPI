@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Category;
+use App\Comment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
-class CategoryController extends Controller {
-
+class CommentController extends Controller
+{
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index(){
         return response()->json([
             'result' => 'success',
-            'message' => 'greetings from categories'
+            'message' => 'greetings from comments'
         ]);
     }
 
@@ -27,19 +28,24 @@ class CategoryController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
-        if (!$request->has('category')){
+        $noConent = !$request->has('content');
+        $noPostId = !$request->has('post_id');
+        if ($noConent || $noPostId){
             return response()->json([
                 'result' => 'error',
-                'message' => 'You should set the category name with a parameter named category'
+                'message' => 'Missing required parameter' . ($noConent ? ' Content' : '') . ($noPostId ? ' Post_id' : '')
             ]);
         }
-        $name = $request->get('category');
-        $cat = new Category();
-        $cat->name = $name;
-        $cat->save();
+        $content = $request->get('content');
+        $post_id = $request->get('post_id');
+        $comment = new Comment();
+        $comment->post_id = $post_id;
+        $comment->content = $content;
+        $comment->user_id = Auth::user()->id;
+        $comment->save();
         return response()->json([
             'result' => 'success',
-            'category' => $cat
+            'comment' => $comment
         ]);
     }
 
@@ -47,27 +53,28 @@ class CategoryController extends Controller {
      * Display the specified resource.
      *
      * @param Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request){
-        if (!$request->has('category')){
+        if (!$request->has('comment')){
             return response()->json([
                 'result' => 'error',
-                'message' => 'You should set the category id to show with a parameter named category'
+                'message' => 'You should set the comment id to show with a parameter named comment'
             ]);
         }
-        $category = Category::find($request->get('category'));
-        if (is_null($category)){
+        $comment = Comment::find($request->get('comment'));
+        if (is_null($comment)){
             return response()->json([
                 'result' => 'error',
-                'message' => 'Selected category is invalid'
+                'message' => 'Selected comment is invalid'
             ]);
         }
 
         return response()->json([
             'result' => 'success',
-            'category' => $category
+            'comment' => $comment
         ]);
+
     }
 
     /**
@@ -77,32 +84,37 @@ class CategoryController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request){
-        if (!$request->has('category')){
+        if (!$request->has('comment')){
             return response()->json([
                 'result' => 'error',
-                'message' => 'You should set the category id to update with a parameter named category'
+                'message' => 'You should set the comment id to update with a parameter named category'
             ]);
         }
-        $category = Category::find($request->get('category'));
-        if (is_null($category)){
+        $comment = Comment::find($request->get('comment'));
+        if (is_null($comment)){
             return response()->json([
                 'result' => 'error',
-                'message' => 'Selected category is invalid'
-            ]);
-        }
-
-        if (!$request->has('nCategory')){
-            return response()->json([
-                'result' => 'error',
-                'message' => 'You should set the new category name with a parameter named nCategory'
+                'message' => 'Selected comment is invalid'
             ]);
         }
 
-        $name = $request->get('nCategory');
-        $category->name = $name;
+
+        $noConent = !$request->has('content');
+        if ($noConent){
+            return response()->json([
+                'result' => 'error',
+                'message' => 'Missing required parameter' . ($noConent ? ' Content' : '')
+            ]);
+        }
+
+        $content = $request->get('content');
+        $comment->content = $content;
+        $comment->save();
+
+
         return response()->json([
             'result' => 'success',
-            'category' => $category
+            'comment' => $comment
         ]);
     }
 
@@ -110,27 +122,27 @@ class CategoryController extends Controller {
      * Remove the specified resource from storage.
      *
      * @param Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Request $request){
-        if (!$request->has('category')){
+        if (!$request->has('comment')){
             return response()->json([
                 'result' => 'error',
-                'message' => 'You should set the category id to delete with a parameter named category'
+                'message' => 'You should set the comment id to delete with a parameter named comment'
             ]);
         }
-        $category = Category::find($request->get('category'));
-        if (is_null($category)){
+        $comment = Comment::find($request->get('comment'));
+        if (is_null($comment)){
             return response()->json([
                 'result' => 'error',
-                'message' => 'Selected category is invalid'
+                'message' => 'Selected comment is invalid'
             ]);
         }
 
-        $category->delete();
+        $comment->delete();
         return response()->json([
             'result' => 'success',
-            'message' => 'Category deleted successfully'
+            'message' => 'Comment deleted successfully'
         ]);
     }
 }

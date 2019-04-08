@@ -36,7 +36,19 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:api']], function() {
 
 
 // Posts
-// Categories
 Route::group(['middleware'=>['auth:api']], function(){
-    Route::apiResource('categories', 'API\CategoryController');
+    // Categories
+    Route::get('/categories','API\CategoryController@index');
+    Route::post('/categories/store','API\CategoryController@store');
+    Route::get('/categories/show','API\CategoryController@show');
+    Route::patch('/categories/update','API\CategoryController@update');
+    Route::delete('/categories/delete','API\CategoryController@destroy');
+
+    // Comments
+    Route::get('/comments','API\CommentController@index');
+    Route::post('/comments/store','API\CommentController@store');
+    Route::get('/comments/show','API\CommentController@show');
+    Route::patch('/comments/update','API\CommentController@update');
+    Route::delete('/comments/delete','API\CommentController@destroy');
+
 });
