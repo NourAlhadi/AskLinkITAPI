@@ -148,7 +148,7 @@ class UserController extends Controller{
      */
     public function getAvatar(MediaHelper $helper){
         $user = Auth::user();
-        return response()->file($helper->getUploadedFile($user->avatar,'images'));
+        return $helper->getUploadedFile($user->avatar,'images');
     }
 
 

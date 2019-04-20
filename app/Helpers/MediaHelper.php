@@ -20,7 +20,7 @@ class MediaHelper{
      * @return string
      */
     public function uploadFile($file,$path = null){
-        Storage::disk('local')->put($path,$file);
+        Storage::disk('public')->put($path,$file);
         return $file->hashName();
     }
 
@@ -30,7 +30,7 @@ class MediaHelper{
      * @return string
      */
     public function getUploadedFileUrl($file,$path){
-        return Storage::disk('local')->url($path . DIRECTORY_SEPARATOR . $file);
+        return Storage::disk('public')->url($path . DIRECTORY_SEPARATOR . $file);
     }
 
     /**
@@ -41,6 +41,6 @@ class MediaHelper{
      */
     public function getUploadedFile($file,$path){
         $path = $path . DIRECTORY_SEPARATOR . $file;
-        return Storage::disk('local')->get($path);
+        return Storage::disk('public')->download($path);
     }
 }
