@@ -94,6 +94,7 @@ class UserController extends Controller{
 
         $user = Auth::user();
         $avatar = $helper->getUploadedFileUrl($user->avatar,'images');
+        $roles = $user->roles;
         return response()->json([
             'result' => 'success',
             'user' => $user,
