@@ -234,6 +234,7 @@ return [
 
         // Added By Nour Alhadi
         'Laratrust'   => Laratrust\LaratrustFacade::class,
+        'MediaHelper' => App\Helpers\MediaHelper::class,
 
     ],
 

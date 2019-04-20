@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Helpers\MediaHelper;
 use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -89,10 +90,10 @@ class UserController extends Controller{
      *
      * @return \Illuminate\Http\Response
      */
-    public function user(){
+    public function user(MediaHelper $helper){
 
         $user = Auth::user();
-        $avatar = url('') . '/images/' . $user->avatar;
+        $avatar = $helper->getUploadedFileUrl($user->avatar,'images');
         return response()->json([
             'result' => 'success',
             'user' => $user,
@@ -106,7 +107,7 @@ class UserController extends Controller{
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function userEdit(Request $request){
+    public function userEdit(Request $request, MediaHelper $helper){
         $validator = Validator::make($request->all(), [
             'email' => 'email|unique:users',
             'avatar' => 'file|max:4096',
@@ -124,16 +125,13 @@ class UserController extends Controller{
         if (!is_null($request->get('name'))) $user->name = $request->get('name');
         if (!is_null($request->get('email'))) $user->email = $request->get('email');
         if ($request->hasFile('avatar')) {
-
             $image = $request->file('avatar');
-            $name = md5(uniqid($image->getBasename())).'.'.$image->guessExtension();
-            $destinationPath = public_path('/images');
-            $image->move($destinationPath, $name);
+            $name = $helper->uploadFile($image,'images');
             $user->avatar = $name;
         }
         $user->save();
 
-        $avatar = url('') . '/images/' . $user->avatar;
+        $avatar = $helper->getUploadedFileUrl($user->avatar,'images');
         return response()->json([
             'result' => 'success',
             'user' => $user,
@@ -146,10 +144,11 @@ class UserController extends Controller{
      * Get User Avatar API Endpoint
      *
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function getAvatar(){
+    public function getAvatar(MediaHelper $helper){
         $user = Auth::user();
-        return response()->file(public_path('/images/' . $user->avatar));
+        return response()->file($helper->getUploadedFile($user->avatar,'images'));
     }
 
 
@@ -159,17 +158,16 @@ class UserController extends Controller{
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function setAvatar(Request $request){
+    public function setAvatar(Request $request, MediaHelper $helper){
         $user = Auth::user();
         if ($request->hasFile('avatar')) {
 
             $image = $request->file('avatar');
-            $name = md5(uniqid($image->getBasename())).'.'.$image->guessExtension();
-            $destinationPath = public_path('/images');
-            $image->move($destinationPath, $name);
+            $name = $helper->uploadFile($image, 'images');
             $user->avatar = $name;
+            $user->save();
 
-            $avatar = url('') . '/images/' . $user->avatar;
+            $avatar = $helper->getUploadedFileUrl($name,'images');
             return response()->json([
                 'result' => 'success',
                 'avatar' => $avatar
